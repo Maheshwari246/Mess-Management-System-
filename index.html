@@ -1,1 +1,205 @@
 
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Student Dashboard</title>
+
+    <style>
+        body{
+            font-family: Arial;
+            background:#f2f2f2;
+            text-align:center;
+        }
+
+        .box{
+            width:400px;
+            margin:auto;
+            margin-top:50px;
+            background:white;
+            padding:20px;
+            border-radius:10px;
+        }
+
+        input, button{
+            width:90%;
+            padding:10px;
+            margin:5px;
+        }
+
+        .card{
+            background:#eee;
+            padding:10px;
+            margin:5px;
+            text-align:left;
+            border-radius:5px;
+        }
+
+        #dashboard{ display:none; }
+    </style>
+</head>
+
+<body>
+
+<div class="box" id="auth">
+    <h2>🍽 Student Login</h2>
+
+    <input id="sid" placeholder="Student ID">
+    <input id="name" placeholder="Name">
+    <input id="pass" type="password" placeholder="Password">
+
+    <button onclick="register()">Register</button>
+    <button onclick="login()">Login</button>
+
+    <br><br>
+    <a href="admin.html">🔐 Admin Panel</a>
+</div>
+
+<!-- DASHBOARD -->
+<div class="box" id="dashboard">
+
+    <h2>Student Dashboard</h2>
+
+    <button onclick="viewMenu()">View Menu</button>
+    <button onclick="addComplaint()">Add Complaint</button>
+    <button onclick="viewComplaints()">My Complaints</button>
+    <button onclick="logout()">Logout</button>
+
+    <div id="output"></div>
+</div>
+
+<script>
+
+// ---------------- STORAGE ----------------
+function getStudents(){
+    return JSON.parse(localStorage.getItem("students")) || [];
+}
+
+function saveStudents(data){
+    localStorage.setItem("students", JSON.stringify(data));
+}
+
+function getComplaints(){
+    return JSON.parse(localStorage.getItem("complaints")) || [];
+}
+
+function saveComplaints(data){
+    localStorage.setItem("complaints", JSON.stringify(data));
+}
+
+function getMenu(){
+    return JSON.parse(localStorage.getItem("menu")) || [];
+}
+
+let currentUser = null;
+
+// ---------------- REGISTER ----------------
+function register(){
+    let sid = document.getElementById("sid").value;
+    let name = document.getElementById("name").value;
+    let pass = document.getElementById("pass").value;
+
+    let students = getStudents();
+
+    if(students.find(s => s.id === sid)){
+        alert("ID already exists");
+        return;
+    }
+
+    students.push({id:sid, name:name, password:pass});
+    saveStudents(students);
+
+    alert("Registered");
+}
+
+// ---------------- LOGIN ----------------
+function login(){
+    let sid = document.getElementById("sid").value;
+    let pass = document.getElementById("pass").value;
+
+    let students = getStudents();
+
+    let user = students.find(s => s.id === sid && s.password === pass);
+
+    if(user){
+        currentUser = user;
+
+        document.getElementById("auth").style.display = "none";
+        document.getElementById("dashboard").style.display = "block";
+    }else{
+        alert("Invalid login");
+    }
+}
+
+// ---------------- MENU ----------------
+function viewMenu(){
+    let menu = getMenu();
+
+    let out = "<h3>🍽 Menu</h3>";
+
+    if(menu.length === 0){
+        out += "<p>No menu added by admin</p>";
+    }
+
+    menu.forEach(m=>{
+        out += `
+        <div class="card">
+            <b>${m.day}</b><br>
+            Breakfast: ${m.breakfast}<br>
+            Lunch: ${m.lunch}<br>
+            Dinner: ${m.dinner}
+        </div>`;
+    });
+
+    document.getElementById("output").innerHTML = out;
+}
+
+// ---------------- COMPLAINT ----------------
+function addComplaint(){
+    let text = prompt("Enter Complaint:");
+
+    let complaints = getComplaints();
+
+    complaints.push({
+        id: Date.now(),
+        student_id: currentUser.id,
+        text: text,
+        status: "Pending"
+    });
+
+    saveComplaints(complaints);
+
+    alert("Complaint Added");
+}
+
+// ---------------- VIEW COMPLAINTS ----------------
+function viewComplaints(){
+    let complaints = getComplaints();
+
+    let mine = complaints.filter(c => c.student_id === currentUser.id);
+
+    let out = "<h3>My Complaints</h3>";
+
+    if(mine.length === 0){
+        out += "<p>No complaints</p>";
+    }
+
+    mine.forEach(c=>{
+        out += `
+        <div class="card">
+            ${c.text}<br>
+            Status: ${c.status}
+        </div>`;
+    });
+
+    document.getElementById("output").innerHTML = out;
+}
+
+// ---------------- LOGOUT ----------------
+function logout(){
+    location.reload();
+}
+
+</script>
+
+</body>
+</html>
