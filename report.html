@@ -1,1 +1,98 @@
 
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Reports Page</title>
+
+    <style>
+        body{
+            font-family: Arial;
+            background:#f2f2f2;
+            text-align:center;
+        }
+
+        .box{
+            width:500px;
+            margin:auto;
+            margin-top:30px;
+            background:white;
+            padding:20px;
+            border-radius:10px;
+        }
+
+        .card{
+            background:#eee;
+            padding:10px;
+            margin:8px;
+            text-align:left;
+            border-radius:5px;
+        }
+
+        button{
+            padding:10px;
+            margin:5px;
+            width:90%;
+        }
+    </style>
+</head>
+
+<body>
+
+<div class="box">
+    <h2>📊 Reports Dashboard</h2>
+
+    <button onclick="loadReport()">Load Reports</button>
+
+    <div id="output"></div>
+</div>
+
+<script>
+
+// ---------- GET DATA ----------
+function getComplaints(){
+    return JSON.parse(localStorage.getItem("complaints")) || [];
+}
+
+function getStudents(){
+    return JSON.parse(localStorage.getItem("students")) || [];
+}
+
+// ---------- REPORT ----------
+function loadReport(){
+
+    let complaints = getComplaints();
+    let students = getStudents();
+
+    let pending = complaints.filter(c => c.status === "Pending").length;
+    let solved = complaints.filter(c => c.status === "Solved").length;
+
+    let out = `
+        <h3>📌 Summary</h3>
+        <div class="card">Total Students: ${students.length}</div>
+        <div class="card">Total Complaints: ${complaints.length}</div>
+        <div class="card">Pending: ${pending}</div>
+        <div class="card">Solved: ${solved}</div>
+        <hr>
+        <h3>🧾 All Complaints</h3>
+    `;
+
+    if(complaints.length === 0){
+        out += "<p>No complaints found</p>";
+    }
+
+    complaints.forEach(c=>{
+        out += `
+        <div class="card">
+            <b>Student:</b> ${c.student_id}<br>
+            <b>Complaint:</b> ${c.text}<br>
+            <b>Status:</b> ${c.status}
+        </div>`;
+    });
+
+    document.getElementById("output").innerHTML = out;
+}
+
+</script>
+
+</body>
+</html>
