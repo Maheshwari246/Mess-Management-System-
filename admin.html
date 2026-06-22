@@ -1,1 +1,151 @@
 
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Admin Panel</title>
+    <style>
+        body{
+            font-family: Arial;
+            background:#f2f2f2;
+            text-align:center;
+        }
+
+        .box{
+            width:400px;
+            margin:auto;
+            margin-top:40px;
+            background:white;
+            padding:20px;
+            border-radius:10px;
+        }
+
+        input, textarea{
+            width:90%;
+            padding:10px;
+            margin:5px;
+        }
+
+        button{
+            width:95%;
+            padding:10px;
+            margin:5px;
+            cursor:pointer;
+        }
+
+        .card{
+            background:#eee;
+            padding:10px;
+            margin:5px;
+            text-align:left;
+        }
+    </style>
+</head>
+
+<body>
+
+<div class="box">
+    <h2>🔐 Admin Panel</h2>
+
+    <input id="day" placeholder="Day">
+    <input id="b" placeholder="Breakfast">
+    <input id="l" placeholder="Lunch">
+    <input id="d" placeholder="Dinner">
+
+    <button onclick="addMenu()">Add Menu</button>
+
+    <hr>
+
+    <button onclick="viewComplaints()">View Complaints</button>
+    <button onclick="viewStudents()">View Students</button>
+
+    <div id="output"></div>
+</div>
+
+<script>
+function getMenu(){
+    return JSON.parse(localStorage.getItem("menu")) || [];
+}
+
+function saveMenu(data){
+    localStorage.setItem("menu", JSON.stringify(data));
+}
+
+function getStudents(){
+    return JSON.parse(localStorage.getItem("students")) || [];
+}
+
+function getComplaints(){
+    return JSON.parse(localStorage.getItem("complaints")) || [];
+}
+
+// ---------------- ADD MENU ----------------
+function addMenu(){
+    let menu = getMenu();
+
+    menu.push({
+        day: document.getElementById("day").value,
+        breakfast: document.getElementById("b").value,
+        lunch: document.getElementById("l").value,
+        dinner: document.getElementById("d").value
+    });
+
+    saveMenu(menu);
+
+    alert("Menu Added");
+}
+
+// ---------------- VIEW COMPLAINTS ----------------
+function viewComplaints(){
+    let complaints = getComplaints();
+
+    let out = "<h3>Complaints</h3>";
+
+    complaints.forEach((c, i)=>{
+        out += `
+        <div class="card">
+            <b>ID:</b> ${c.student_id}<br>
+            <b>Complaint:</b> ${c.text}<br>
+            <b>Status:</b> ${c.status}<br>
+
+            <button onclick="resolve(${c.id})">Mark Resolved</button>
+        </div>`;
+    });
+
+    document.getElementById("output").innerHTML = out;
+}
+
+// ---------------- RESOLVE ----------------
+function resolve(id){
+    let complaints = getComplaints();
+
+    complaints = complaints.map(c=>{
+        if(c.id === id){
+            c.status = "Resolved";
+        }
+        return c;
+    });
+
+    localStorage.setItem("complaints", JSON.stringify(complaints));
+
+    alert("Updated");
+    viewComplaints();
+}
+
+// ---------------- STUDENTS ----------------
+function viewStudents(){
+    let students = getStudents();
+
+    let out = "<h3>Students</h3>";
+
+    students.forEach(s=>{
+        out += `<div class="card">
+        ${s.id} - ${s.name}
+        </div>`;
+    });
+
+    document.getElementById("output").innerHTML = out;
+}
+</script>
+
+</body>
+</html>
